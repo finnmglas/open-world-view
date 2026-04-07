@@ -15,6 +15,14 @@ It's a solid nextjs frontend and python backend application.
 
 **open-world-view** is inspired by the recent work of Ex-Google PM.
 
+## Story
+
+was created and maintained by Julia ([gh](github.com/JoulesSpace), [li](https://www.linkedin.com/in/julia-yukovich-data-automation)) and Finn ([gh](https://github.com/finnmglas), [li](https://www.linkedin.com/in/finnmglas/)).
+
+they/we work on the german startup [aicuflow](https://www.aicuflow.com/?ref=owv).
+
+multiple sources of inspiration for this.
+
 ## Installation
 
 Clone this repository:
@@ -71,3 +79,10 @@ Will be decided upon reception, likely more permissive.
 Whatever you want to use this for, we're open to talk and help you use it:
 
 Book a meeting with Julia: https://calendar.app.google/khvTrBGaGvG9feECA
+
+---
+
+![the developers, julia and finn](https://github.com/finnmglas/open-world-view/blob/main/public/devs.webp)
+
+Happy data-exploring\
+\- the devs julia & finn
