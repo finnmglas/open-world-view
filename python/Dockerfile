@@ -1,0 +1,14 @@
+# responsible: finn
+# goal: build be for prod
+# gpt: make a fastapi app to start, codeblocks pls. make a fastapi, dockerfile and docker compose for it to run it in dev / prod both kinds of setups please like the fe is too
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

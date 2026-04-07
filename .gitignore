@@ -4,3 +4,6 @@ data_postgres
 data_redis
 
 .env
+
+*.pyc
+__pycache__

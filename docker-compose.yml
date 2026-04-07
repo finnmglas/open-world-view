@@ -5,6 +5,7 @@
 # run detached: docker compose up --build -d
 # stop: docker compose down
 
+# frontend - backend - data layers
 services:
 
   ###########################
@@ -37,9 +38,42 @@ services:
     environment:
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: "1"
+      API_URL: http://api-dev:8000
     command: pnpm dev
+    depends_on:
+      - api-dev
     profiles: ["dev"]
   
+  ##########################
+  ## --- backend layer --- #
+  ##########################
+
+  # prod backend: build and run reliable
+  api:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    image: fastapi-backend-prod
+    # ports:
+    #   - "8000:8000"
+    env_file:
+      - ./python/.env.production
+    restart: unless-stopped
+    profiles: ["prod"]
+
+  # dev backend: hot reload, debug
+  api-dev:
+    build:
+      context: ./python
+      dockerfile: Dockerfile.dev
+    # ports:
+    #   - "8000:8000"
+    volumes:
+      - ./python:/app
+    environment:
+      PYTHONUNBUFFERED: "1"
+    profiles: ["dev"]
+
   #######################
   ## --- data layer --- #
   #######################
