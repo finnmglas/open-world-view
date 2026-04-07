@@ -48,6 +48,22 @@ To start, you want to star this repo so we find more people to contribute to it!
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
+### Contributors quick start
+
+Process
+
+- Clone `finnmglas/open-world-view`
+- Branch `<dev-name>/<feat-name>`
+- Commit `<docs|feat|fix|cicd>: <feature-name-short>\n\n<opt-longer-text>`
+- Issue for big changes [here](https://github.com/finnmglas/open-world-view/issues)
+- PR for minor, working changesets [here](https://github.com/finnmglas/open-world-view/pulls)
+- Get approved | rejected | homework
+
+Quirks:
+
+- Each folder must contain a `_folderinfo` file explaining in mostly a sentence its contents
+- Each code file is owned by a dev, therefore it contains a `responsible: <dev-name|Finn>` part
+
 ## License
 
 Will be decided upon reception, likely more permissive.
