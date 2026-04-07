@@ -1,8 +1,11 @@
 # open-world-view
 
-open-world-view is a nextjs frontend and python backend application, presenting real-time geo datasets in an unprecedented way.
+lets you **expore real-time geo datasets** in an unprecedented way.\
+It's a solid nextjs frontend and python backend application.
 
-open-world-view is inspired by the recent work of Ex-Google PM.
+![image prompt for dalle: you want to create a github title image for a osint application that is like palantir and google earth, real time intelligence, very cool many datasources and ai power. you want to do this really well. you dont want to use logos. you want to have the globe in center of screen and have it look a bit like the person of interest series](https://github.com/finnmglas/open-world-view/blob/main/public/banner.webp)
+
+**open-world-view** is inspired by the recent work of Ex-Google PM.
 
 ## Installation
 
