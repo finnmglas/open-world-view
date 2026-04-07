@@ -1,0 +1,6 @@
+# folders of data volume mounts
+data_qdrant
+data_postgres
+data_redis
+
+.env

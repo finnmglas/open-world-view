@@ -6,7 +6,12 @@
 # stop: docker compose down
 
 services:
-  # prod fe
+
+  ###########################
+  ## --- frontend layer --- #
+  ###########################
+
+  # prod fe: build and start (more efficient, faster)
   web:
     build:
       context: ./frontend
@@ -19,7 +24,7 @@ services:
     restart: unless-stopped
     profiles: ["prod"]
   
-  # dev fe
+  # dev fe: local mount, hot reload (takes more ram)
   web-dev:
     build:
       context: ./frontend
@@ -34,3 +39,45 @@ services:
       NEXT_TELEMETRY_DISABLED: "1"
     command: pnpm dev
     profiles: ["dev"]
+  
+  #######################
+  ## --- data layer --- #
+  #######################
+
+  # qdrant vector db for dev & prod (embeddings)
+  qdrant:
+    image: qdrant/qdrant:v1.17
+    container_name: qdrant
+    restart: unless-stopped
+    # ports:
+    #   - "6333:6333"
+    #   - "6334:6334"
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
+    volumes:
+      - ./data_qdrant:/qdrant/storage
+
+  # postgres sql db for dev & prod (tabular data store)
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    # ports:
+    #   - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./data_postgres:/var/lib/postgresql/data
+
+  # redis memory layer for dev & prod (caching data)
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    # ports:
+    #   - "6379:6379"
+    volumes:
+      - ./data_redis:/data
