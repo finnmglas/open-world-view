@@ -1,7 +1,15 @@
+> 👋 Hey there, hello world!\
+> We just got started building this today (20260407),\
+> pls don't expect it to match its spec quite yet!\
+> You still want to star & watch this project for near-future value from it!\
+> Regards, Julia & Finn 💙
+
 # open-world-view
 
 lets you **expore real-time geo datasets** in an unprecedented way.\
 It's a solid nextjs frontend and python backend application.
+
+![FREE & OPEN SOURCE, not just talking but delivering](https://img.shields.io/badge/free_&_open_source-proudly!-%23111?style=for-the-badge&labelColor=%23111&color=%23eee) ![Clean code, by real devs](https://img.shields.io/badge/clean_code-real_devs-%23111?style=for-the-badge&labelColor=%23111&color=%23eee) ![Built in public](https://img.shields.io/badge/maturity-early_alpha_version-%23111?style=for-the-badge&labelColor=%23111&color=%23eee)
 
 ![image prompt for dalle: you want to create a github title image for a osint application that is like palantir and google earth, real time intelligence, very cool many datasources and ai power. you want to do this really well. you dont want to use logos. you want to have the globe in center of screen and have it look a bit like the person of interest series](https://github.com/finnmglas/open-world-view/blob/main/public/banner.webp)
 
@@ -25,11 +33,18 @@ Then the app is available at:
 
 [http://localhost:3000/](http://localhost:3000/)
 
+Then you want to star this repo so more people benefit!
+
 ## Usage
 
 Tap around, scroll around, have fun!
 
 ## Contributing
+
+![Yes, contributions are very welcome but don't overdo the unreviewed ai prs pls](https://img.shields.io/badge/contributions-welcome-%23111?style=for-the-badge&labelColor=%23111&color=%23eee) ![GitHub Repo stars](https://img.shields.io/github/stars/finnmglas/open-world-view?style=for-the-badge&labelColor=%23111&color=%23eee)
+ ![GitHub contributors](https://img.shields.io/github/contributors/finnmglas/open-world-view?style=for-the-badge&labelColor=%23111&color=%23eee) ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/finnmglas/open-world-view?style=for-the-badge&labelColor=%23111&color=%23eee)
+
+To start, you want to star this repo so we find more people to contribute to it!
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
