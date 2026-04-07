@@ -72,6 +72,8 @@ Quirks:
 - Each folder must contain a `_folderinfo` file explaining in mostly a sentence its contents
 - Each code file is owned by a dev, therefore it contains a `responsible: <dev-name|Finn>` part
 
+Cool extra: check out [ghloc](https://ghloc.vercel.app/finnmglas/open-world-view?branch=main) to see the complexity of our app distributed across languages and folders :)
+
 ## License
 
 Will be decided upon reception, likely more permissive.
