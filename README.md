@@ -34,7 +34,7 @@ git clone https://github.com/finnmglas/open-world-view
 Use docker to securely run the world view.
 
 ```sh
-docker compose up -d
+docker compose --profile prod up -d  --build
 ```
 
 Then the app is available at:
@@ -42,6 +42,12 @@ Then the app is available at:
 [http://localhost:3000/](http://localhost:3000/)
 
 Then you want to star this repo so more people benefit!
+
+### Dev setup
+
+```sh
+sudo docker compose --profile dev up --build
+```
 
 ## Usage
 

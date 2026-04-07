@@ -1,0 +1,36 @@
+# responsible: finn
+# goal: run the app easily
+#
+# run: docker compose up --build
+# run detached: docker compose up --build -d
+# stop: docker compose down
+
+services:
+  # prod fe
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: open-world-view-frontend-prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.production
+    restart: unless-stopped
+    profiles: ["prod"]
+  
+  # dev fe
+  web-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+    command: pnpm dev
+    profiles: ["dev"]
