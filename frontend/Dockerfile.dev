@@ -1,19 +1,15 @@
 # responsible: finn
 # goal: reloading dev fe for local dev
-# gpt: dockerfile to run nextjs frontend in it, make one for prod container and one for dev container
 
 FROM node:20-alpine
 
 WORKDIR /app
 RUN corepack enable
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
-
-COPY . .
-
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 3000
-CMD ["pnpm", "dev"]
+
+# pnpm install runs at container start (not build time) so new host deps are picked up
+CMD ["sh", "-c", "pnpm install && pnpm dev"]
