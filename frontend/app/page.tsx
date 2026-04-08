@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PingCard } from "@/components/dashboard/PingCard";
 import { ViewStatePanel } from "@/components/dashboard/ViewStatePanel";
+import { ShortcutsCard } from "@/components/dashboard/ShortcutsCard";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
             <PingCard />
           </Suspense>
           <ViewStatePanel />
+          <ShortcutsCard />
         </div>
       }
     />
