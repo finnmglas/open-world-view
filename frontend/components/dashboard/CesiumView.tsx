@@ -64,16 +64,22 @@ export function CesiumView() {
       // Remove any default imagery layers (Bing / Ion defaults).
       viewer.imageryLayers.removeAll();
 
-      // Add NaturalEarthII — ships with the Cesium package, served from
-      // public/cesium/Assets/Textures/NaturalEarthII, no CORS issues.
-      try {
-        const imagery = await C.TileMapServiceImageryProvider.fromUrl(
-          C.buildModuleUrl("Assets/Textures/NaturalEarthII"),
-        );
-        if (!destroyed) viewer.imageryLayers.addImageryProvider(imagery);
-      } catch (e) {
-        console.error("NaturalEarthII imagery failed to load:", e);
-      }
+      // NaturalEarthII — built-in Cesium texture, no network requests, nice globe look.
+      // Swap to OSM (below) for street-level detail.
+      const imagery = await C.TileMapServiceImageryProvider.fromUrl(
+        C.buildModuleUrl("Assets/Textures/NaturalEarthII"),
+      );
+      if (!destroyed) viewer.imageryLayers.addImageryProvider(imagery);
+
+      // Swap-in: OpenStreetMap tiles — zoom 0–19 (house level), needs COEP removed in next.config.ts.
+      // viewer.imageryLayers.addImageryProvider(
+      //   new C.UrlTemplateImageryProvider({
+      //     url:          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      //     minimumLevel: 0,
+      //     maximumLevel: 19,
+      //     credit: new C.Credit("© OpenStreetMap contributors", false),
+      //   }),
+      // );
 
       viewer.scene.skyAtmosphere.show   = true;
       viewer.scene.fog.enabled          = false;
@@ -83,6 +89,10 @@ export function CesiumView() {
       const ctrl = viewer.scene.screenSpaceCameraController;
       ctrl.minimumZoomDistance = 100;
       ctrl.maximumZoomDistance = 3e7;
+      // Remove the north-pole constraint so the camera can freely orbit over
+      // either pole without gimbal lock or coordinate jumping.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (ctrl as any).constrainedAxis = undefined;
 
       // Replace Cesium's built-in scroll-wheel zoom (which is very slow) with
       // our own handler. We remove WHEEL from zoomEventTypes so Cesium never
@@ -211,6 +221,25 @@ export function CesiumView() {
             },
           });
         },
+
+        tilt: (delta) => {
+          if (viewer.isDestroyed()) return;
+          // Cesium pitch: 0 = horizon, -π/2 = nadir, +π/2 = zenith.
+          // Allow a full sweep so the user can look straight up into space.
+          const newPitch = C.Math.clamp(
+            viewer.camera.pitch + C.Math.toRadians(delta),
+            -C.Math.PI_OVER_TWO,
+            C.Math.PI_OVER_TWO,
+          );
+          viewer.camera.setView({
+            destination:  viewer.camera.position.clone(),
+            orientation: {
+              heading: viewer.camera.heading,
+              pitch:   newPitch,
+              roll:    viewer.camera.roll,
+            },
+          });
+        },
       });
 
       // ------------------------------------------------------------------ //
@@ -221,11 +250,14 @@ export function CesiumView() {
       viewer.camera.changed.addEventListener(() => {
         if (viewer.isDestroyed()) return;
         const carto = viewer.camera.positionCartographic;
-        useViewStore.getState().setPosition(
+        const store = useViewStore.getState();
+        store.setPosition(
           C.Math.toDegrees(carto.latitude),
           C.Math.toDegrees(carto.longitude),
         );
-        useViewStore.getState().setZoom(heightToZoom(carto.height));
+        store.setZoom(heightToZoom(carto.height));
+        // Cesium pitch: 0=horizon, -π/2=nadir, +π/2=zenith — matches store.pitch.
+        store.setPitch(C.Math.toDegrees(viewer.camera.pitch));
       });
 
       // ------------------------------------------------------------------ //

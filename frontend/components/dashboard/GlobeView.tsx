@@ -71,6 +71,86 @@ export function GlobeView() {
         camera.up.x = x; camera.up.y = y; camera.up.z = z;
         controls.update();
       },
+
+      panNS: (degrees) => {
+        const globe = ref.current;
+        if (!globe) return;
+        const { lat, lng: lon, altitude } = globe.pointOfView();
+        const latR = lat * Math.PI / 180;
+        const lonR = lon * Math.PI / 180;
+
+        // Camera position unit vector (ECEF, radius = 1)
+        const px = Math.cos(latR) * Math.cos(lonR);
+        const py = Math.sin(latR);
+        const pz = Math.cos(latR) * Math.sin(lonR);
+
+        // Geographic east axis at this position: ey = 0 always
+        const ex = -Math.sin(lonR);
+        const ez =  Math.cos(lonR);
+
+        // Rodrigues rotation around east axis
+        const angle = degrees * Math.PI / 180;
+        const cosA = Math.cos(angle), sinA = Math.sin(angle);
+        const dot  = ex * px + ez * pz;          // e · p  (ey = 0)
+        const cx   = -ez * py;                   // (e × p).x
+        const cy   =  ez * px - ex * pz;         // (e × p).y
+        const cz   =  ex * py;                   // (e × p).z
+
+        const nx = px * cosA + cx * sinA + ex * dot * (1 - cosA);
+        const ny = py * cosA + cy * sinA;         // ey = 0 → no e*(e·p) term
+        const nz = pz * cosA + cz * sinA + ez * dot * (1 - cosA);
+
+        const newLat = Math.asin(Math.max(-1, Math.min(1, ny))) * 180 / Math.PI;
+        const newLon = Math.atan2(nz, nx) * 180 / Math.PI;
+
+        globe.pointOfView({ lat: newLat, lng: newLon, altitude }, 0);
+        setPosition(newLat, newLon);
+      },
+
+      tilt: (delta) => {
+        // Orbit the camera around the "right" axis (perpendicular to both the
+        // camera-to-origin direction and the camera's up vector) using Rodrigues.
+        const globe = ref.current;
+        if (!globe) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const camera   = globe.camera()   as { position: { x:number;y:number;z:number }; up: { x:number;y:number;z:number } };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const controls = globe.controls() as { update: () => void };
+        const rad = (delta * Math.PI) / 180;
+        const cosR = Math.cos(rad), sinR = Math.sin(rad);
+
+        const { x: px, y: py, z: pz } = camera.position;
+        const len = Math.sqrt(px*px + py*py + pz*pz);
+        if (len === 0) return;
+        // Forward vector: camera → origin (normalised)
+        const fx = -px/len, fy = -py/len, fz = -pz/len;
+        const { x: ux, y: uy, z: uz } = camera.up;
+        // Right = forward × up (tilt axis)
+        const rx = fy*uz - fz*uy, ry = fz*ux - fx*uz, rz = fx*uy - fy*ux;
+        const rLen = Math.sqrt(rx*rx + ry*ry + rz*rz);
+        if (rLen === 0) return;
+        const ax = rx/rLen, ay = ry/rLen, az = rz/rLen;
+
+        const rotVec = (vx: number, vy: number, vz: number) => {
+          const d = ax*vx + ay*vy + az*vz;
+          return {
+            x: vx*cosR + (ay*vz - az*vy)*sinR + ax*d*(1-cosR),
+            y: vy*cosR + (az*vx - ax*vz)*sinR + ay*d*(1-cosR),
+            z: vz*cosR + (ax*vy - ay*vx)*sinR + az*d*(1-cosR),
+          };
+        };
+
+        // Rotate both position and up to preserve orientation
+        const newPos = rotVec(px, py, pz);
+        camera.position.x = newPos.x;
+        camera.position.y = newPos.y;
+        camera.position.z = newPos.z;
+        const newUp = rotVec(ux, uy, uz);
+        camera.up.x = newUp.x;
+        camera.up.y = newUp.y;
+        camera.up.z = newUp.z;
+        controls.update();
+      },
     });
   });
 

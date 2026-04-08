@@ -7,6 +7,8 @@ type ShortcutRow = {
   keys: string[];
   label: string;
   note?: string;
+  /** Display keys as alternatives ("or") instead of a chord sequence ("then") */
+  alt?: boolean;
 };
 
 type ShortcutSection = {
@@ -24,14 +26,16 @@ const SECTIONS: ShortcutSection[] = [
       { keys: ["D", "→"], label: "Move east" },
       { keys: ["E"], label: "Rotate clockwise" },
       { keys: ["Q"], label: "Rotate counter-clockwise" },
-      { keys: ["Shift", "+any"], label: "4× speed", note: "hold" },
+      { keys: ["2"], label: "Tilt up (toward space)" },
+      { keys: ["X"], label: "Tilt down (toward nadir)" },
     ],
   },
   {
     title: "Zoom",
     rows: [
-      { keys: ["+", "="], label: "Zoom in" },
-      { keys: ["-"], label: "Zoom out" },
+      { keys: ["+", "=", "Space"], label: "Zoom in", alt: true },
+      { keys: ["-", "C"], label: "Zoom out", alt: true },
+      { keys: ["Shift", "+any"], label: "4× speed", note: "hold" },
     ],
   },
   {
@@ -62,14 +66,18 @@ const SECTIONS: ShortcutSection[] = [
   },
 ];
 
-function ShortcutRow({ keys, label, note }: ShortcutRow) {
+function ShortcutRow({ keys, label, note, alt }: ShortcutRow) {
   return (
     <div className="flex items-center justify-between gap-4 py-0.5">
       <span className="text-xs text-muted-foreground">{label}</span>
       <div className="flex items-center gap-1 shrink-0">
         {keys.map((k, i) => (
           <span key={i} className="flex items-center gap-1">
-            {i > 0 && <span className="text-[10px] text-muted-foreground/40">then</span>}
+            {i > 0 && (
+              <span className="text-[10px] text-muted-foreground/40">
+                {alt ? "or" : "then"}
+              </span>
+            )}
             <Kbd className="text-[10px] px-1.5 py-0.5">{k}</Kbd>
           </span>
         ))}
@@ -93,7 +101,7 @@ export function ShortcutsCard() {
             {section.title}
           </p>
           {section.rows.map((row) => (
-            <ShortcutRow key={row.label} {...row} />
+            <ShortcutRow key={row.keys.join("+")} {...row} />
           ))}
         </div>
       ))}

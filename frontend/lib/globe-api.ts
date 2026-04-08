@@ -11,6 +11,14 @@ export interface GlobeHandlers {
   move:   (lat: number, lon: number, zoom: number) => void;
   flyTo:  (lat: number, lon: number, zoom: number, durationMs?: number) => void;
   rotate: (delta: number) => void;
+  /** Tilt the camera up (+) or down (−) by delta degrees. */
+  tilt:   (delta: number) => void;
+  /**
+   * Move north (+) or south (−) by delta degrees via a 3-D Rodrigues rotation
+   * around the geographic east axis. Handles pole crossing naturally — no
+   * lat/lon clamping, no bounce.
+   */
+  panNS:  (degrees: number) => void;
 }
 
 class GlobeAPI {
@@ -33,6 +41,16 @@ class GlobeAPI {
   /** Bearing rotation — used by Q/E keys. */
   rotate(delta: number) {
     this.h?.rotate(delta);
+  }
+
+  /** Camera pitch tilt — used by 2/X keys. */
+  tilt(delta: number) {
+    this.h?.tilt(delta);
+  }
+
+  /** North/south movement that crosses poles correctly — used by W/S keys. */
+  panNS(degrees: number) {
+    this.h?.panNS(degrees);
   }
 }
 

@@ -9,11 +9,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Required for Cesium's SharedArrayBuffer-based parallel workers
+        // COOP: prevents cross-origin windows from getting a reference to ours.
+        // COEP (require-corp) is intentionally OMITTED — it would block cross-origin
+        // tile requests (OSM, etc.) because those CDNs don't send CORP headers.
+        // We don't use terrain or 3D tiles so SharedArrayBuffer is not needed.
         source: "/(.*)",
         headers: [
-          { key: "Cross-Origin-Opener-Policy",   value: "same-origin" },
-          { key: "Cross-Origin-Embedder-Policy",  value: "require-corp" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
         ],
       },
     ];
