@@ -46,7 +46,7 @@ export function DashboardLayout({ panels }: DashboardLayoutProps) {
           size="icon"
           variant="outline"
           onClick={togglePanels}
-          className="bg-black/60 border-white/10 text-white hover:bg-white/10 backdrop-blur-sm"
+          className="bg-background!"
           aria-label={panelsOpen ? "Hide panels" : "Show panels"}
         >
           {panelsOpen ? <X className="size-4" /> : <Layers className="size-4" />}

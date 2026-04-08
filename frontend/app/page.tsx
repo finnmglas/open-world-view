@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <DashboardLayout
       panels={
-        <div className="flex flex-col gap-4 w-80">
+        <div className="flex flex-col gap-4 w-100 pr-3">
           <Suspense
             fallback={
               <div className="w-full rounded border border-border bg-card p-6">
