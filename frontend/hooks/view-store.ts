@@ -8,6 +8,7 @@ import { persist } from "zustand/middleware";
 // ---------------------------------------------------------------------------
 
 export type ObservationMode = "idle" | "free" | "follow" | "orbit" | "survey" | "slew";
+export type GlobeType = "cesium" | "globe";
 
 export type ViewState = {
   // --- Hydration ---
@@ -59,6 +60,9 @@ export type ViewState = {
   timestamp: number;    // unix ms – time of observation
   utcOffset: number;    // hours offset from UTC
 
+  // --- Renderer ---
+  globeType: GlobeType;
+
   // ---------------------------------------------------------------------------
   // Actions
   // ---------------------------------------------------------------------------
@@ -101,6 +105,8 @@ export type ViewState = {
 
   setTimestamp: (timestamp: number) => void;
   setUtcOffset: (utcOffset: number) => void;
+
+  setGlobeType: (globeType: GlobeType) => void;
 
   reset: () => void;
 };
@@ -161,6 +167,8 @@ const defaults: Omit<
 
   timestamp: Date.now(),
   utcOffset: 0,
+
+  globeType: "cesium",
 };
 
 // ---------------------------------------------------------------------------
@@ -215,6 +223,8 @@ export const useViewStore = create<ViewState>()(
       setTimestamp: (timestamp) => set({ timestamp }),
       setUtcOffset: (utcOffset) => set({ utcOffset }),
 
+      setGlobeType: (globeType) => set({ globeType }),
+
       reset: () => set({ ...defaults, hasHydrated: true }),
     }),
     {
@@ -241,6 +251,7 @@ export const useViewStore = create<ViewState>()(
         imageHeight: s.imageHeight,
         observationMode: s.observationMode,
         utcOffset: s.utcOffset,
+        globeType: s.globeType,
       }),
     },
   ),

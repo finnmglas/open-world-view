@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PingCard } from "@/components/dashboard/PingCard";
+import { ViewSettingsPanel } from "@/components/dashboard/ViewSettingsPanel";
 import { ViewStatePanel } from "@/components/dashboard/ViewStatePanel";
 import { WsDebugCard } from "@/components/dashboard/WsDebugCard";
 import { ShortcutsCard } from "@/components/dashboard/ShortcutsCard";
@@ -10,6 +11,7 @@ export default function Home() {
     <DashboardLayout
       panels={
         <div className="flex flex-col gap-4 w-100 pr-3">
+          <ViewSettingsPanel />
           <Suspense
             fallback={
               <div className="w-full rounded border border-border bg-card p-6">

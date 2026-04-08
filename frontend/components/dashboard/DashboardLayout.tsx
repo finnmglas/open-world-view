@@ -4,12 +4,18 @@ import { useCallback, useState } from "react";
 import { Layers, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
+import { useViewStore } from "@/hooks/view-store";
 
-// CesiumJS is WebGL-only — must be client-side and loaded after CESIUM_BASE_URL is set
+// Both globe backends — client-side only
 const CesiumView = dynamic(
   () => import("@/components/dashboard/CesiumView").then((m) => ({ default: m.CesiumView })),
-  { ssr: false, loading: () => <div className="w-full h-full bg-black" /> },
+  { ssr: false, loading: () => <div className="absolute inset-0 bg-black" /> },
 );
+const GlobeView = dynamic(
+  () => import("@/components/dashboard/GlobeView").then((m) => ({ default: m.GlobeView })),
+  { ssr: false, loading: () => <div className="absolute inset-0 bg-black" /> },
+);
+
 import { KeyboardController } from "@/components/keyboard-controller";
 import { CommandPalette } from "@/components/command-palette";
 import { SequenceHint } from "@/components/sequence-hint";
@@ -22,13 +28,15 @@ export function DashboardLayout({ panels }: DashboardLayoutProps) {
   const [panelsOpen, setPanelsOpen]   = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
-  const togglePanels         = useCallback(() => setPanelsOpen((v) => !v), []);
-  const openCommandPalette   = useCallback(() => setPaletteOpen(true), []);
+  const globeType = useViewStore((s) => s.globeType);
+
+  const togglePanels       = useCallback(() => setPanelsOpen((v) => !v), []);
+  const openCommandPalette = useCallback(() => setPaletteOpen(true), []);
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black">
       {/* Globe fills entire viewport */}
-      <CesiumView />
+      {globeType === "cesium" ? <CesiumView /> : <GlobeView />}
 
       {/* Keyboard controller — mounts all keyboard hooks, renders nothing */}
       <KeyboardController
