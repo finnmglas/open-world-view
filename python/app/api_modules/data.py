@@ -10,7 +10,7 @@ from app.event_bus import bus
 def register_data_eps(app: FastAPI) -> None:
 
     @app.get("/data")
-    def sources_overview():
+    async def sources_overview():
         """List all sources with their current status. None run until started."""
         return {
             name: {"channel": src.channel, **src.status}
@@ -18,13 +18,13 @@ def register_data_eps(app: FastAPI) -> None:
         }
 
     @app.get("/data/{source}")
-    def get_source_snapshot(source: str):
+    async def get_source_snapshot(source: str):
         """Latest cached records for a source (empty until started)."""
         src = _get_or_404(source)
         return src.snapshot()
 
     @app.post("/data/{source}/start")
-    def start_source(source: str):
+    async def start_source(source: str):
         """Start a data source. No-op if already running."""
         src = _get_or_404(source)
         if src.is_running():
@@ -33,7 +33,7 @@ def register_data_eps(app: FastAPI) -> None:
         return {"status": "started", "source": source, "channel": src.channel}
 
     @app.post("/data/{source}/stop")
-    def stop_source(source: str):
+    async def stop_source(source: str):
         """Stop a running data source."""
         src = _get_or_404(source)
         if not src.is_running():

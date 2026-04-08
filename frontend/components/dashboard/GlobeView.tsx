@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useViewStore } from "@/hooks/view-store";
 import { globeAPI, zoomToAltitude } from "@/lib/globe-api";
+import { useDataSources } from "@/hooks/use-data-sources";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Globe = dynamic(() => import("react-globe.gl"), { ssr: false }) as React.ComponentType<any>;
@@ -190,11 +191,97 @@ export function GlobeView() {
   const lat = useViewStore((s) => s.lat);
   const lon = useViewStore((s) => s.lon);
 
+  // Live data from all active sources
+  const { enabled, earthquakes, planes, satellites, boats, lightning } = useDataSources();
+  const zoom = useViewStore((s) => s.zoom);
+
+  const livePoints = useMemo(() => {
+    // Viewport culling: only render points within the visible spherical cap.
+    // The globe camera altitude (in Earth-radii) determines how much of the
+    // sphere is visible. Points further than the horizon angle are hidden.
+    const altitude  = zoomToAltitude(zoom);                          // Earth-radii
+    const horizonDeg = Math.acos(1 / (1 + altitude)) * 180 / Math.PI; // degrees of arc
+    const visibleDeg = horizonDeg * 1.05;                             // 5% margin
+
+    const latRad = lat * Math.PI / 180;
+    const lonRad = lon * Math.PI / 180;
+    const cosLat = Math.cos(latRad);
+    const sinLat = Math.sin(latRad);
+
+    function inView(pLat: number, pLng: number): boolean {
+      // Great-circle angular distance via dot product (faster than haversine for a threshold test)
+      const pLatR = pLat * Math.PI / 180;
+      const pLonR = pLng * Math.PI / 180;
+      const dot =
+        sinLat * Math.sin(pLatR) +
+        cosLat * Math.cos(pLatR) * Math.cos(pLonR - lonRad);
+      // dot = cos(angular_distance); threshold = cos(visibleDeg)
+      return dot >= Math.cos(visibleDeg * Math.PI / 180);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pts: any[] = [];
+
+    if (enabled.earthquakes) {
+      for (const eq of earthquakes) {
+        if (eq.lat == null || eq.lon == null) continue;
+        if (!inView(eq.lat, eq.lon)) continue;
+        const mag = eq.magnitude ?? 1;
+        const alertColor =
+          eq.alert === "red"    ? "rgba(239,68,68,0.9)"   :
+          eq.alert === "orange" ? "rgba(249,115,22,0.9)"  :
+          eq.alert === "yellow" ? "rgba(234,179,8,0.9)"   :
+                                  "rgba(239,68,68,0.7)";
+        pts.push({ id: `eq-${eq.id}`, lat: eq.lat, lng: eq.lon,
+          size: Math.max(0.1, mag * 0.08), altitude: 0.005, color: alertColor });
+      }
+    }
+
+    if (enabled.planes) {
+      for (const pl of planes) {
+        if (pl.lat == null || pl.lon == null || pl.on_ground) continue;
+        if (!inView(pl.lat, pl.lon)) continue;
+        const altKm = (pl.baro_altitude_m ?? 10000) / 1000;
+        pts.push({ id: `pl-${pl.icao24}`, lat: pl.lat, lng: pl.lon,
+          size: 0.12, altitude: altKm / 6371, color: "rgba(59,130,246,0.85)" });
+      }
+    }
+
+    if (enabled.satellites) {
+      for (const sat of satellites) {
+        if (!inView(sat.lat, sat.lon)) continue;
+        pts.push({ id: `sat-${sat.norad_id}`, lat: sat.lat, lng: sat.lon,
+          size: 0.12, altitude: sat.altitude_km / 6371, color: "rgba(168,85,247,0.85)" });
+      }
+    }
+
+    if (enabled.boats) {
+      for (const boat of boats) {
+        if (!inView(boat.lat, boat.lon)) continue;
+        pts.push({ id: `boat-${boat.mmsi}`, lat: boat.lat, lng: boat.lon,
+          size: 0.12, altitude: 0.001, color: "rgba(20,184,166,0.85)" });
+      }
+    }
+
+    if (enabled.lightning) {
+      for (const strike of lightning) {
+        if (!inView(strike.lat, strike.lon)) continue;
+        const pol = strike.polarity ?? 0;
+        const color = pol < 0 ? "rgba(250,204,21,0.9)" : "rgba(251,191,36,0.7)";
+        pts.push({ id: `lt-${strike.timestamp}-${strike.lat}`, lat: strike.lat, lng: strike.lon,
+          size: 0.08, altitude: 0.001, color });
+      }
+    }
+
+    return pts;
+  }, [enabled, earthquakes, planes, satellites, boats, lightning, lat, lon, zoom]);
+
   const points = [
-    { id: "observer", lat, lng: lon,       size: 0.35, color: "rgba(99,102,241,1)" },
+    { id: "observer", lat, lng: lon,       size: 0.35, altitude: 0.01, color: "rgba(99,102,241,1)" },
     ...(targetLat !== null && targetLon !== null
-      ? [{ id: "target", lat: targetLat, lng: targetLon, size: 0.3, color: "rgba(251,113,133,1)" }]
+      ? [{ id: "target", lat: targetLat, lng: targetLon, size: 0.3, altitude: 0.01, color: "rgba(251,113,133,1)" }]
       : []),
+    ...livePoints,
   ];
 
   const arcs =
@@ -220,7 +307,7 @@ export function GlobeView() {
           atmosphereColor="rgba(100,140,255,0.8)"
           atmosphereAltitude={0.18}
           pointsData={points}
-          pointAltitude={0.01}
+          pointAltitude="altitude"
           pointRadius="size"
           pointColor="color"
           pointsMerge={false}
