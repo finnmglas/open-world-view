@@ -1,11 +1,27 @@
+import { Suspense } from "react";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { PingCard } from "@/components/dashboard/PingCard";
 import { ViewStatePanel } from "@/components/dashboard/ViewStatePanel";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <PingCard />
-      <ViewStatePanel />
-    </main>
+    <DashboardLayout
+      panels={
+        <div className="flex flex-col gap-4 w-80">
+          <Suspense
+            fallback={
+              <div className="w-full rounded border border-border bg-card p-6">
+                <p className="text-xs font-mono text-muted-foreground animate-pulse">
+                  connecting to backend…
+                </p>
+              </div>
+            }
+          >
+            <PingCard />
+          </Suspense>
+          <ViewStatePanel />
+        </div>
+      }
+    />
   );
 }
