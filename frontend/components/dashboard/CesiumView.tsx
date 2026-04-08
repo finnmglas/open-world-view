@@ -80,8 +80,39 @@ export function CesiumView() {
       viewer.scene.globe.enableLighting = false;
 
       // Allow zooming all the way in (100 m) and out (well past the globe).
-      viewer.scene.screenSpaceCameraController.minimumZoomDistance = 100;
-      viewer.scene.screenSpaceCameraController.maximumZoomDistance = 3e7;
+      const ctrl = viewer.scene.screenSpaceCameraController;
+      ctrl.minimumZoomDistance = 100;
+      ctrl.maximumZoomDistance = 3e7;
+
+      // Replace Cesium's built-in scroll-wheel zoom (which is very slow) with
+      // our own handler. We remove WHEEL from zoomEventTypes so Cesium never
+      // processes wheel events, then add a capture-phase listener that zooms
+      // proportionally to the current camera altitude — fast far out, fine close in.
+      ctrl.zoomEventTypes = (ctrl.zoomEventTypes as unknown[]).filter(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (t: any) => t !== C.CameraEventType.WHEEL
+          && t?.eventType !== C.CameraEventType.WHEEL,
+      );
+
+      const onWheel = (e: WheelEvent) => {
+        if (viewer.isDestroyed()) return;
+        e.preventDefault();
+        const height = viewer.camera.positionCartographic.height;
+        // Normalise across deltaMode: DOM_DELTA_LINE / DOM_DELTA_PAGE are rare
+        // but make scrolling absurdly fast if not handled.
+        const raw =
+          e.deltaMode === 1 ? e.deltaY * 32 :   // line → px
+          e.deltaMode === 2 ? e.deltaY * 800 :   // page → px
+          e.deltaY;
+        // Speed multiplier: tune this number to taste (0.25 = snappy, 0.1 = gentle)
+        const amount = (Math.abs(raw) / 100) * height * 0.25;
+        if (raw > 0) viewer.camera.zoomOut(amount);
+        else         viewer.camera.zoomIn(amount);
+      };
+
+      viewer.scene.canvas.addEventListener("wheel", onWheel, { passive: false });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (viewer as any)._wheelHandler = onWheel;
 
       // Force the viewer to fill whatever size the container currently is.
       viewer.resize();
@@ -229,6 +260,9 @@ export function CesiumView() {
       if (v && !v.isDestroyed()) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (v as any)._inputHandler?.destroy();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const wh = (v as any)._wheelHandler;
+        if (wh) v.scene.canvas.removeEventListener("wheel", wh);
         v.destroy();
       }
       viewerRef.current = null;
