@@ -73,8 +73,14 @@ services:
     #   - "8000:8000"
     volumes:
       - ./python:/app
+    env_file:
+      - ./python/.env
     environment:
       PYTHONUNBUFFERED: "1"
+    depends_on:
+      - postgres
+      - qdrant
+      - redis
     profiles: ["dev"]
 
   #######################

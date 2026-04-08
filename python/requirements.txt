@@ -1,3 +1,8 @@
 # backend/requirements.txt
 fastapi
 uvicorn[standard]
+pydantic-settings
+sqlalchemy[asyncio]
+asyncpg
+qdrant-client
+redis[hiredis]
