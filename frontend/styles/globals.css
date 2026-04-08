@@ -128,3 +128,20 @@
     @apply font-sans;
   }
 }
+
+/* ── Cesium DOM reset ──────────────────────────────────────────────────────── */
+/* Prevent our global * rule from injecting borders/outlines into Cesium's     */
+/* internal widget elements.                                                    */
+/* IMPORTANT: never override canvas width/height via CSS — Cesium manages the  */
+/* canvas element's size attributes directly; CSS overrides break DPI scaling  */
+/* and mouse-event coordinate mapping, causing blank renders and zoom issues.  */
+.cesium-widget,
+.cesium-widget * {
+  border: none !important;
+  outline: none !important;
+  box-sizing: content-box;
+}
+.cesium-widget {
+  width: 100% !important;
+  height: 100% !important;
+}

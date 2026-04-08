@@ -41,8 +41,8 @@ services:
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: "1"
       API_URL: http://api-dev:8000
-    # pnpm install at startup picks up any packages added on the host
-    command: sh -c "pnpm install && pnpm dev"
+    # install deps, copy Cesium static assets (skipped if already present), start dev server
+    command: sh -c "pnpm install && node scripts/setup-cesium.mjs && pnpm dev"
     depends_on:
       - api-dev
     profiles: ["dev"]

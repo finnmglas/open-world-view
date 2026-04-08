@@ -3,7 +3,13 @@
 import { useCallback, useState } from "react";
 import { Layers, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GlobeView } from "@/components/dashboard/GlobeView";
+import dynamic from "next/dynamic";
+
+// CesiumJS is WebGL-only — must be client-side and loaded after CESIUM_BASE_URL is set
+const CesiumView = dynamic(
+  () => import("@/components/dashboard/CesiumView").then((m) => ({ default: m.CesiumView })),
+  { ssr: false, loading: () => <div className="w-full h-full bg-black" /> },
+);
 import { KeyboardController } from "@/components/keyboard-controller";
 import { CommandPalette } from "@/components/command-palette";
 import { SequenceHint } from "@/components/sequence-hint";
@@ -22,7 +28,7 @@ export function DashboardLayout({ panels }: DashboardLayoutProps) {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black">
       {/* Globe fills entire viewport */}
-      <GlobeView />
+      <CesiumView />
 
       {/* Keyboard controller — mounts all keyboard hooks, renders nothing */}
       <KeyboardController

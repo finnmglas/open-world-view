@@ -34,9 +34,44 @@ export function GlobeView() {
   const setPosition = useViewStore((s) => s.setPosition);
   const setZoom     = useViewStore((s) => s.setZoom);
 
-  // Register the globe ref with the singleton so any code can move it.
+  // Register handler-based globeAPI so keyboard controls / chord sequences work.
   useEffect(() => {
-    if (globeRef.current) globeAPI.register(globeRef);
+    if (!globeRef.current) return;
+    const ref = globeRef; // stable capture
+
+    globeAPI.register({
+      move: (lat, lon, zoom) => {
+        ref.current?.pointOfView({ lat, lng: lon, altitude: zoomToAltitude(zoom) }, 0);
+      },
+      flyTo: (lat, lon, zoom, durationMs = 800) => {
+        ref.current?.pointOfView({ lat, lng: lon, altitude: zoomToAltitude(zoom) }, durationMs);
+      },
+      rotate: (delta) => {
+        const globe = ref.current;
+        if (!globe) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const camera   = globe.camera()   as { position: { x:number;y:number;z:number }; up: { x:number;y:number;z:number } };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const controls = globe.controls() as { update: () => void };
+        const rad = (delta * Math.PI) / 180;
+        const cosR = Math.cos(rad), sinR = Math.sin(rad);
+        const { x: px, y: py, z: pz } = camera.position;
+        const len = Math.sqrt(px*px + py*py + pz*pz);
+        if (len === 0) return;
+        const ax = -px/len, ay = -py/len, az = -pz/len;
+        const rot = (vx: number, vy: number, vz: number) => {
+          const d = ax*vx + ay*vy + az*vz;
+          return {
+            x: vx*cosR + (ay*vz - az*vy)*sinR + ax*d*(1-cosR),
+            y: vy*cosR + (az*vx - ax*vz)*sinR + ay*d*(1-cosR),
+            z: vz*cosR + (ax*vy - ay*vx)*sinR + az*d*(1-cosR),
+          };
+        };
+        const { x, y, z } = rot(camera.up.x, camera.up.y, camera.up.z);
+        camera.up.x = x; camera.up.y = y; camera.up.z = z;
+        controls.update();
+      },
+    });
   });
 
   // Container size tracking
