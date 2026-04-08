@@ -44,6 +44,11 @@ export function GlobeView() {
   const setPosition = useViewStore((s) => s.setPosition);
   const setZoom     = useViewStore((s) => s.setZoom);
 
+  // When true, the *globe* just updated the store — skip the effect that would
+  // animate the camera back to the (now identical) stored position, which is
+  // what causes the "snapping back" during free drag.
+  const skipNextSync = useRef(false);
+
   // Track container size
   useEffect(() => {
     const el = containerRef.current;
@@ -56,8 +61,14 @@ export function GlobeView() {
     return () => ro.disconnect();
   }, []);
 
-  // Animate camera when store changes
+  // Animate camera only for *external* store changes (e.g. programmatic flyTo).
+  // When the globe itself was the source of the change we skip to avoid fighting
+  // the user's drag gesture.
   useEffect(() => {
+    if (skipNextSync.current) {
+      skipNextSync.current = false;
+      return;
+    }
     if (!globeRef.current) return;
     globeRef.current.pointOfView(
       { lat, lng: lon, altitude: zoomToAltitude(zoom) },
@@ -65,12 +76,15 @@ export function GlobeView() {
     );
   }, [lat, lon, zoom]);
 
-  // Sync zoom when user scrolls on the globe
+  // User panned or zoomed the globe → push full POV into the store.
+  // onZoom fires with { lat, lng, altitude } = the camera's current look-at point.
   const handleZoom = useCallback(
-    ({ altitude }: { altitude: number }) => {
+    ({ lat: pLat, lng: pLng, altitude }: { lat: number; lng: number; altitude: number }) => {
+      skipNextSync.current = true;
+      setPosition(pLat, pLng);
       setZoom(altitudeToZoom(altitude));
     },
-    [setZoom],
+    [setPosition, setZoom],
   );
 
   // Click to reposition observer
