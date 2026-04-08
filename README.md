@@ -15,6 +15,12 @@ It's a solid nextjs frontend and python backend application.
 
 **open-world-view** is inspired by the recent work of Ex-Google PM.
 
+## Features
+
+1. High level **Map Globe** with Keyboard shortcut controls (soon 3d closeups, shaders)
+2. Real-time **geodata**: planes, earthquakes (soon more)
+3. (soon) time explorations and ai projections
+
 ## Story
 
 was created and maintained by Julia ([gh](github.com/JoulesSpace), [li](https://www.linkedin.com/in/julia-yukovich-data-automation)) and Finn ([gh](https://github.com/finnmglas), [li](https://www.linkedin.com/in/finnmglas/)).
