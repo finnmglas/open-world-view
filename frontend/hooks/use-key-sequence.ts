@@ -66,6 +66,9 @@ export function useKeySequence(sequences: SequenceMap, timeout = 1200) {
       if (exact) {
         e.preventDefault();
         exact();
+        // Tell keyboard-controls to release/block the completing key so it
+        // doesn't also trigger movement (e.g. "gd" → Dubai should not move east).
+        window.dispatchEvent(new CustomEvent("sequence-consumed", { detail: e.key }));
         reset();
         return;
       }

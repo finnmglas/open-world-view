@@ -22,6 +22,8 @@ const SECTIONS: ShortcutSection[] = [
       { keys: ["S", "↓"], label: "Move south" },
       { keys: ["A", "←"], label: "Move west" },
       { keys: ["D", "→"], label: "Move east" },
+      { keys: ["E"], label: "Rotate clockwise" },
+      { keys: ["Q"], label: "Rotate counter-clockwise" },
       { keys: ["Shift", "+any"], label: "4× speed", note: "hold" },
     ],
   },
