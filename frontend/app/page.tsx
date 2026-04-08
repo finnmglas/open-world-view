@@ -12,6 +12,9 @@ export default function Home() {
       panels={
         <div className="flex flex-col gap-4 w-100 pr-3">
           <ViewSettingsPanel />
+          <ViewStatePanel />
+          <ShortcutsCard />
+          <WsDebugCard />
           <Suspense
             fallback={
               <div className="w-full rounded border border-border bg-card p-6">
@@ -23,9 +26,6 @@ export default function Home() {
           >
             <PingCard />
           </Suspense>
-          <WsDebugCard />
-          <ViewStatePanel />
-          <ShortcutsCard />
         </div>
       }
     />
