@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     redis_port: int = 6379
     redis_password: str = ""
 
+    # data sources — optional, sources requiring keys are skipped if unset
+    aisstream_api_key: str = ""   # https://aisstream.io  (free, AIS boats)
+
     @property
     def postgres_url(self) -> str:
         return (

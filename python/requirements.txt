@@ -6,3 +6,6 @@ sqlalchemy[asyncio]
 asyncpg
 qdrant-client
 redis[hiredis]
+httpx
+sgp4
+websockets
